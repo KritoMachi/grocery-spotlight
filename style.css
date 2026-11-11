@@ -1,0 +1,75 @@
+:root {
+  --green: #4a6b3a;
+  --green-dark: #2f4a24;
+  --text: #2a2f27;
+  --muted: #5f6b59;
+  --bg: #ffffff;
+  --line: #dfe6da;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Source Sans 3", Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  text-align: center;
+}
+
+h1, h2, .brand {
+  font-family: "Lora", Georgia, "Times New Roman", serif;
+}
+
+header, main, footer {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+header {
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  margin: 0;
+  font-weight: 700;
+  color: var(--green);
+}
+
+main { padding-top: 3rem; padding-bottom: 3rem; }
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2.5rem;
+  line-height: 1.15;
+  color: var(--green-dark);
+}
+
+.lead {
+  margin: 0 0 2.5rem;
+  font-size: 1.2rem;
+  color: var(--muted);
+}
+
+h2 {
+  margin: 2rem 0 0.25rem;
+  font-size: 1.2rem;
+  color: var(--green);
+}
+
+p { margin: 0 0 1rem; }
+
+footer {
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+a { color: var(--green); }
