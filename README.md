@@ -19,8 +19,7 @@ spotlight/
 │   ├── logo-pin-produce.png     # Secondary pin-produce logo PNG
 │   ├── screenshot-animated-landing.png # Full-resolution screen capture
 │   └── sweet-potatoes.jpg       # Product showcase imagery
-└── .agents/
-    └── mcp_config.json          # MCP configuration for Stitch API
+└── 
 ```
 
 ---
