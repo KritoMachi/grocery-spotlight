@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grocery Spotlight Demo</title>
+<style>
+/* Layout idea: one phone-sized screen, centered, so a screen recording reads like a real app. Single light theme by choice. */
+:root {
+  color-scheme: light;
+  --forest: #1f4d3a;
+  --green: #2f7d57;
+  --mint: #eaf2ec;
+  --line: #d3e2d8;
+  --squash: #f0b04a;
+  --tomato: #c8374a;
+  --tomato-tint: #fbe9ec;
+  --ink: #1b2a22;
+  --muted: #5b6b62;
+  --paper: #ffffff;
+  --stage: #14382a;
+  --display: Cambria, "Noto Serif", Georgia, serif;
+  --body: Calibri, Carlito, "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body { background: var(--stage); font-family: var(--body); color: var(--ink); display: flex; align-items: center; justify-content: center; padding: 12px; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+button:focus-visible { outline: 3px solid var(--squash); outline-offset: 2px; }
+.phone { width: 100%; max-width: 400px; height: 100%; max-height: 800px; background: var(--paper); border-radius: 30px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+.top { padding: 20px 20px 10px; display: flex; align-items: center; gap: 10px; }
+.top h1 { font-family: var(--display); font-size: 25px; color: var(--forest); flex: 1; text-wrap: balance; line-height: 1.1; }
+.back { width: 36px; height: 36px; border-radius: 50%; background: var(--mint); display: grid; place-items: center; color: var(--forest); font-size: 18px; font-weight: 700; flex: none; text-align: center; }
+.chip { font-size: 13px; font-weight: 700; color: var(--forest); background: var(--mint); padding: 6px 12px; border-radius: 99px; white-space: nowrap; }
+main { flex: 1; overflow-y: auto; padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
+main > * { flex: none; }
+.lede { color: var(--muted); font-size: 16px; line-height: 1.3; }
+.label { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--forest); margin-top: 6px; }
+.card { background: var(--mint); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.card.pick { background: var(--forest); color: #fff; }
+.card.pick .tag { color: var(--squash); }
+.card.pick p { color: #e3efe7; }
+.card h2 { font-family: var(--display); font-size: 23px; line-height: 1.15; }
+.card p { font-size: 16px; line-height: 1.3; }
+.tag { font-size: 13px; font-weight: 700; color: var(--green); letter-spacing: .02em; }
+.list { background: var(--mint); border-radius: 16px; overflow: hidden; }
+.row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.row + .row { border-top: 1px solid var(--line); }
+.row .txt { flex: 1; min-width: 0; }
+.row b { display: block; font-size: 17px; }
+.row span.sub { font-size: 14px; color: var(--muted); }
+.dot { width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center; background: var(--paper); color: var(--green); }
+.dot svg { width: 20px; height: 20px; }
+.status { font-size: 13px; font-weight: 700; padding: 4px 9px; border-radius: 99px; white-space: nowrap; flex: none; }
+.status.peak { background: #d6ebdc; color: #1e5a3e; }
+.status.off { background: #e6e9e7; color: var(--muted); }
+.pill { width: 100%; background: var(--forest); color: #fff; font-weight: 700; font-size: 17px; border-radius: 99px; padding: 13px 18px; text-align: center; }
+.pill.light { background: var(--paper); color: var(--forest); border: 1px solid var(--forest); }
+.pill.small { width: auto; padding: 8px 14px; font-size: 14px; flex: none; }
+.pill.done { background: var(--green); }
+.summary { display: flex; align-items: center; gap: 12px; }
+.summary .txt { flex: 1; }
+.alert { background: var(--tomato-tint); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+button.alert { width: 100%; }
+.alert h2 { font-family: var(--display); font-size: 23px; line-height: 1.15; }
+.alert p { font-size: 16px; line-height: 1.3; }
+.badge { align-self: flex-start; font-size: 13px; font-weight: 700; color: #fff; background: var(--tomato); padding: 4px 10px; border-radius: 99px; }
+.meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.meta small { display: block; color: var(--muted); font-size: 13px; }
+.meta b { font-size: 16px; }
+.kv { display: flex; flex-direction: column; gap: 8px; font-size: 16px; }
+.kv small { display: block; color: var(--muted); font-size: 13px; }
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: s; }
+.steps li { counter-increment: s; display: flex; gap: 10px; font-size: 16px; line-height: 1.3; }
+.steps li::before { content: counter(s); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--forest); color: #fff; font-weight: 700; font-size: 14px; display: grid; place-items: center; }
+.official { color: var(--forest); font-weight: 700; font-size: 15px; }
+.sample { font-size: 12px; color: var(--muted); text-align: center; }
+nav { display: flex; border-top: 1px solid var(--line); background: var(--paper); }
+nav button { flex: 1; padding: 10px 0 12px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 13px; color: var(--muted); position: relative; }
+nav button[aria-current="page"] { color: var(--forest); font-weight: 700; }
+nav svg { width: 23px; height: 23px; }
+.red { position: absolute; top: 8px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%; background: var(--tomato); }
+.toast { background: var(--green); color: #fff; font-size: 15px; font-weight: 700; padding: 11px 14px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+.toast span { flex: 1; }
+.toast button { color: #fff; text-decoration: underline; font-weight: 700; flex: none; }
+.stack { display: flex; flex-direction: column; }
+.row .stack span.sub { display: block; }
+.acts { display: flex; gap: 8px; }
+.clear { align-self: flex-start; }
+.swapped { align-self: flex-start; white-space: normal; }
+.fade { animation: fade .16s ease-out; }
+@keyframes fade { from { transform: translateY(5px); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fade { animation: none; } }
+</style>
+</head>
+<body>
+
+<div style="position:fixed; top:12px; left:12px; z-index:9999;">
+  <a href="index.html" style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.92); color:#1f4d3a; font-family:var(--body); font-size:13px; font-weight:600; text-decoration:none; padding:8px 14px; border-radius:9999px; box-shadow:0 4px 12px rgba(0,0,0,0.15); border:1px solid rgba(211,226,216,0.8); backdrop-filter:blur(8px); transition:all 0.2s;" onmouseover="this.style.background='#ffffff'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(255,255,255,0.92)'; this.style.transform='none'">
+    <span style="font-size:16px;">&larr;</span> Back to Company Site
+  </a>
+</div>
+
+<div class="phone">
+  <div id="view" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
+  <nav aria-label="Main">
+    <button data-go="seasonal"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 3c-9 0-15 4-15 11 0 1.500.3 2.800.9 4L3 21l1.500 1.300 2.700-3C8.500 20.400 10 21 12 21c6 0 9-6 8-18zM8 17c1-4 4-7 8-9-3 3-5 6-6.200 10-.7-.2-1.300-.5-1.800-1z"/></svg>Seasonal</button>
+    <button data-go="swaps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg>Swaps</button>
+    <button data-go="recalls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20zM12 10v4M12 17.500v.1"/></svg>Recalls<i class="red" id="reddot"></i></button>
+  </nav>
+</div>
+
+<script>
+const icon = {
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg>',
+  root: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="9" ry="6"/><path d="M9 11h.1M14 13h.1"/></svg>',
+  leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 4C10 4 5 8 5 14c0 3 2 6 6 6 7 0 10-7 9-16zM5 21c2-6 5-9 10-11"/></svg>',
+  fruit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="14" r="7"/><path d="M12 7c0-2 1-3 3-4"/></svg>'
+};
+
+const SWAPS = {
+  'Acorn squash': { short: 'Ending soon', why: 'Near the end of its season, so good ones are getting harder to find.', options: [
+    { name: 'Sweet potatoes', tag: 'Best match, in season', note: 'Works 1:1 in roasting and soups.' },
+    { name: 'Butternut squash', tag: 'Closest flavor', note: 'The same squash taste in almost any recipe.' },
+    { name: 'Yukon Gold potatoes', tag: 'Works in soups', note: 'Starchy body for hearty, blended soups.' } ] },
+  'Fresh peaches': { short: 'Out of season', why: 'Out of season here, so they are imported and travel a long way.', options: [
+    { name: 'Fuji apples', tag: 'Best match, in season', note: 'Sweet and firm, good for baking.' },
+    { name: 'Pears', tag: 'Closest texture', note: 'Soft and juicy once ripe.' } ] },
+  'Sweet corn': { short: 'Out of season', why: 'Out of season here, so it is shipped in from far away.', options: [
+    { name: 'Sweet potatoes', tag: 'Best match, in season', note: 'Sweet and hearty as a side dish.' },
+    { name: 'Frozen corn', tag: 'Same ingredient', note: 'Frozen at peak season, works in cooked dishes.' } ] },
+  'Organic cucumbers': { short: 'Some brands recalled', why: 'Some brands are under a recall right now.', options: [
+    { name: 'Greenhouse English cucumbers', tag: 'Not part of this recall', note: 'Same crunch in salads and sandwiches.' },
+    { name: 'Zucchini', tag: 'Works cooked or raw', note: 'Mild flavor, slice thin for salads.' } ] }
+};
+
+let state = { screen: 'seasonal', item: 'Acorn squash', from: 'seasonal' };
+const swaps = new Map(); // original item -> chosen substitute, kept until the page is refreshed
+const view = document.getElementById('view');
+
+function row(ic, name, sub, right, go) {
+  const inner = `<div class="dot">${ic}</div><div class="txt"><b>${name}</b><span class="sub">${sub}</span></div>${right}`;
+  return go ? `<button class="row" data-swap="${go}">${inner}</button>` : `<div class="row">${inner}</div>`;
+}
+
+function swapRow(ic, name, sub, button) {
+  const chosen = swaps.get(name);
+  if (chosen) return row(ic, name, `Using ${chosen.toLowerCase()} instead`, '<span class="status peak">Swapped</span>', name);
+  return row(ic, name, sub, button, name);
+}
+
+function yourSwapsCard() {
+  if (!swaps.size) return '';
+  const n = swaps.size;
+  const lines = [...swaps].map(([a, b]) => `<span class="sub">${a} &#8594; ${b}</span>`).join('');
+  return `<div class="label">Your swaps</div>
+    <div class="list"><button class="row" data-go="swaps">
+      <div class="dot">${icon.swap}</div>
+      <div class="txt"><b>${n} ${n === 1 ? 'swap' : 'swaps'} chosen</b><div class="stack">${lines}</div></div>
+      <span class="official">See all &#8250;</span>
+    </button></div>`;
+}
+
+const lower = t => t.toLowerCase().replace('english', 'English');
+function swappedTo() {
+  const c = swaps.get('Organic cucumbers');
+  return c ? `<span class="status peak swapped">Swapped to ${lower(c)}</span>` : '';
+}
+
+const screens = {
+  seasonal: () => `
+    <div class="top"><h1>What's fresh</h1><span class="chip">Georgia, November</span></div>
+    <main class="fade">
+      <div class="card pick">
+        <span class="tag">THIS WEEK'S PICK</span>
+        <h2>Sweet potatoes</h2>
+        <p>Georgia harvest is at its peak. Great roasted, mashed or in soups.</p>
+      </div>
+      ${yourSwapsCard()}
+      <div class="label">In season</div>
+      <div class="list">
+        ${row(icon.leaf, 'Collard greens', 'Georgia fields, sweeter after frost', '<span class="status peak">Peak</span>')}
+        ${row(icon.fruit, 'Fuji apples', 'North Georgia orchards', '<span class="status peak">Peak</span>')}
+        ${row(icon.leaf, 'Turnip greens', 'Plentiful this month', '<span class="status peak">Peak</span>')}
+      </div>
+      <div class="label">Out of season</div>
+      <div class="list">
+        ${swapRow(icon.fruit, 'Fresh peaches', 'Imported right now', '<span class="pill small">Swap</span>')}
+        ${swapRow(icon.leaf, 'Sweet corn', 'Shipped in from far away', '<span class="pill small">Swap</span>')}
+      </div>
+      <div class="label">Ending soon</div>
+      <div class="list">
+        ${swapRow(icon.root, 'Acorn squash', 'Last of the local harvest', '<span class="pill small">Swap</span>')}
+      </div>
+      <p class="sample">Sample data for this prototype</p>
+    </main>`,
+
+  swaps: () => {
+    const items = Object.keys(SWAPS);
+    const open = items.filter(i => !swaps.has(i));
+    const mine = [...swaps].map(([a, b]) => `<div class="card">
+        <span class="tag">INSTEAD OF ${a.toUpperCase()}</span>
+        <h2>${b}</h2>
+        <div class="acts">
+          <button class="pill small light" data-swap="${a}" data-from="swaps">Change</button>
+          <button class="pill small light" data-undo="${a}">Undo</button>
+        </div>
+      </div>`).join('');
+    return `
+    <div class="top"><h1>Your swaps</h1><span class="chip">${swaps.size} chosen</span></div>
+    <main class="fade">
+      ${swaps.size ? mine : '<p class="lede">Nothing swapped yet. Swaps you choose will show up here.</p>'}
+      ${swaps.size ? '<button class="pill small light clear" data-clear="1">Clear all</button>' : ''}
+      ${open.length ? `<div class="label">Need a swap?</div>
+      <div class="list">${open.map(i => row(icon.root, i, SWAPS[i].short, '<span class="pill small">Swap</span>', i)).join('')}</div>` : ''}
+      <p class="sample">Sample data for this prototype</p>
+    </main>`;
+  },
+
+  detail: () => {
+    const s = SWAPS[state.item];
+    const chosen = swaps.get(state.item);
+    const opts = s.options.map(o => {
+      const picked = chosen === o.name;
+      return `<div class="card">
+        <span class="tag">${o.tag}</span>
+        <h2>${o.name}</h2>
+        <p>${o.note}</p>
+        <button class="pill ${picked ? 'done' : ''}" data-pick="${o.name}">${picked ? 'Using this instead' : 'Use this instead'}</button>
+      </div>`;
+    }).join('');
+    return `
+    <div class="top"><button class="back" data-go="${state.from}" aria-label="Back">&#8249;</button><h1>Find a swap</h1></div>
+    <main class="fade">
+      <div>
+        <span class="tag">INSTEAD OF</span>
+        <div class="label" style="margin:2px 0 2px;font-size:23px">${state.item}</div>
+        <p class="lede">${s.why}</p>
+      </div>
+      ${opts}
+      <p class="sample">Sample data for this prototype</p>
+    </main>`;
+  },
+
+  recalls: () => `
+    <div class="top"><h1>Recalls</h1><span class="chip">1 active</span></div>
+    <main class="fade">
+      <p class="lede">Recalls that affect Georgia. You can't spot these by looking at the food.</p>
+      <div class="alert">
+        <span class="badge">Most serious: Class I</span>
+        <h2>Organic whole cucumbers</h2>
+        <p>Possible Salmonella. FreshRidge Organic and SunHarvest Local.</p>
+        ${swappedTo()}
+        <div class="acts">
+          <button class="pill small light" data-go="notice">View notice</button>
+          <button class="pill small ${swaps.has('Organic cucumbers') ? 'light' : ''}" data-swap="Organic cucumbers" data-from="recalls">${swaps.has('Organic cucumbers') ? 'Change swap' : 'Swap'}</button>
+        </div>
+      </div>
+      <p class="sample">Sample recall for this prototype. Not a real notice.</p>
+    </main>`,
+
+  notice: () => `
+    <div class="top"><button class="back" data-go="recalls" aria-label="Back">&#8249;</button><h1>Recall notice</h1></div>
+    <main class="fade">
+      <div class="alert">
+        <span class="badge">Most serious: Class I</span>
+        <h2>Organic whole cucumbers</h2>
+        <p>Possible Salmonella found during routine testing at a packing facility.</p>
+        <div class="meta">
+          <div><small>Updated</small><b>Nov 3, 2026</b></div>
+          <div><small>Where</small><b>Georgia and Southeast</b></div>
+        </div>
+      </div>
+      <div class="label">Is yours affected?</div>
+      <div class="card kv">
+        <div><small>Brands</small>FreshRidge Organic, SunHarvest Local</div>
+        <div><small>Sold as</small>2-count wrapped packs and loose bulk</div>
+      </div>
+      <div class="label">What to do</div>
+      <ol class="steps">
+        <li>Don't eat them. Throw them away or return them to the store.</li>
+        <li>Wash your produce drawer with warm, soapy water.</li>
+      </ol>
+      <span class="official">Read the official notice &#8599;</span>
+      <div class="label">Safer alternative</div>
+      ${swappedTo()}
+      <div class="card">
+        <span class="tag">NOT PART OF THIS RECALL</span>
+        <h2>Greenhouse English cucumbers</h2>
+        <p>Same crunch in salads and sandwiches.</p>
+        <button class="pill ${swaps.has('Organic cucumbers') ? 'light' : ''}" data-swap="Organic cucumbers" data-from="notice">${swaps.has('Organic cucumbers') ? 'Change swap' : 'Swap'}</button>
+      </div>
+      <p class="sample">Sample recall for this prototype. Not a real notice.</p>
+    </main>`
+};
+
+function render() {
+  view.innerHTML = screens[state.screen]();
+  const tab = { notice: 'recalls', detail: 'swaps' }[state.screen] || state.screen;
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.dataset.go === tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  const m = view.querySelector('main');
+  if (m && state.flash) { const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = `<span>${state.flash}</span>`; m.prepend(d); }
+  if (m) m.scrollTop = 0;
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  state.flash = null;
+  if (t.dataset.clear) swaps.clear();
+  else if (t.dataset.undo) swaps.delete(t.dataset.undo);
+  else if (t.dataset.swap) state = { screen: 'detail', item: t.dataset.swap, from: t.dataset.from || state.screen };
+  else if (t.dataset.pick) {
+    swaps.set(state.item, t.dataset.pick);
+    state.flash = `Using ${lower(t.dataset.pick)} instead of ${state.item.toLowerCase()}`;
+    state.screen = state.from;
+  }
+  else if (t.dataset.go) state.screen = t.dataset.go;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
